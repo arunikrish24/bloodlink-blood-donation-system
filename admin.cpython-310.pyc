@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>404 - Page Not Found</title>
+<style>
+    body {
+        margin: 0;
+        font-family: 'Poppins', sans-serif;
+        background: linear-gradient(to bottom, #fff5f5, #ffeaea);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        text-align: center;
+        padding: 20px;
+    }
+    .container {
+        max-width: 500px;
+        background: white;
+        padding: 30px;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(255, 0, 0, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+    h1 {
+        font-size: 5rem;
+        margin: 0;
+        color: #e63946;
+        font-weight: 700;
+    }
+    p {
+        color: #555;
+        margin: 10px 0 25px;
+        font-size: 1.2rem;
+    }
+    a {
+        display: inline-block;
+        text-decoration: none;
+        background: #e63946;
+        color: white;
+        padding: 12px 25px;
+        border-radius: 25px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(230, 57, 70, 0.3);
+    }
+    a:hover {
+        background: #d62839;
+        box-shadow: 0 4px 20px rgba(230, 57, 70, 0.5);
+    }
+    /* Floating blood drops */
+    .drop {
+        position: absolute;
+        width: 20px;
+        height: 30px;
+        background: #e63946;
+        border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+        opacity: 0.2;
+        animation: float 6s infinite ease-in-out;
+    }
+    .drop:nth-child(1) { top: 20px; left: 40px; animation-delay: 0s; }
+    .drop:nth-child(2) { top: 50px; right: 50px; animation-delay: 1.5s; }
+    .drop:nth-child(3) { bottom: 40px; left: 80px; animation-delay: 3s; }
+    .drop:nth-child(4) { bottom: 30px; right: 60px; animation-delay: 4.5s; }
+    @keyframes float {
+        0% { transform: translateY(0); opacity: 0.2; }
+        50% { transform: translateY(-15px); opacity: 0.4; }
+        100% { transform: translateY(0); opacity: 0.2; }
+    }
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <div class="drop"></div>
+        <div class="drop"></div>
+        <div class="drop"></div>
+        <div class="drop"></div>
+        <h1>404</h1>
+        <p>Oops! Looks like you took a wrong turn.<br>Let’s get you back to saving lives ❤️</p>
+        <a href="javascript:history.back()">Go Back</a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,144 @@
+html,
+body {
+    height: 100%;
+    margin: 0;
+}
+
+#wrapper {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: row;
+}
+
+#sidebar-wrapper {
+    min-width: 250px;
+    max-width: 250px;
+    height: 100vh;
+    background: linear-gradient(to bottom, #dc3545, #c82333);
+    color: #fff;
+    position: fixed;
+    left: 0;
+    top: 0;
+    padding-top: 20px;
+    overflow-y: auto;
+    z-index: 1000;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease-in-out;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#wrapper.toggled #sidebar-wrapper {
+    margin-left: -250px;
+}
+
+#sidebar-wrapper .sidebar-heading {
+    font-size: 1.5rem;
+    font-weight: bold;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    margin-bottom: 1rem;
+}
+
+#sidebar-wrapper .list-group-item {
+    background: transparent;
+    color: #fff;
+    font-weight: 500;
+    padding: 1rem 1.5rem;
+    border: none;
+    transition: background 0.2s ease-in-out, padding-left 0.2s;
+}
+
+#sidebar-wrapper .list-group-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    padding-left: 1.75rem;
+    cursor: pointer;
+}
+
+#sidebar-wrapper .list-group-item i {
+    margin-right: 10px;
+    min-width: 20px;
+}
+
+@media (max-width: 768px) {
+    #sidebar-wrapper {
+        margin-left: -250px;
+    }
+
+    #wrapper.toggled #sidebar-wrapper {
+        margin-left: 0;
+    }
+
+    #page-content-wrapper {
+        margin-left: 0;
+        width: 100%;
+    }
+}
+
+#page-content-wrapper {
+    margin-left: 250px;
+    width: calc(100% - 250px);
+    padding: 2rem;
+    transition: margin 0.3s ease-in-out;
+}
+
+#wrapper.toggled #page-content-wrapper {
+    margin-left: 0;
+    width: 100%;
+}
+
+.card {
+    border-radius: 10px;
+    transition: 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.blood-box-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.blood-box {
+    background: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 8px 12px;
+    min-width: 60px;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease-in-out;
+}
+
+.blood-box:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.blood-group {
+    font-weight: bold;
+    font-size: 1rem;
+    color: #dc3545;
+    display: block;
+}
+
+.blood-units {
+    font-size: 0.8rem;
+    color: #6c757d;
+    display: block;
+}
+
+/* Keep them in two lines (4 per row) */
+.blood-box-grid .blood-box {
+    flex: 1 0 calc(25% - 10px);
+}
+
+@media (max-width: 576px) {
+    .blood-box-grid .blood-box {
+        flex: 1 0 calc(50% - 10px);
+        /* 2 per row on small screens */
+    }
+}

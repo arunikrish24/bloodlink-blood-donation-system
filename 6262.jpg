@@ -1,0 +1,164 @@
+from django.db import models
+from django.contrib.auth.hashers import make_password, check_password
+import uuid
+from datetime import date, timedelta
+from django.utils import timezone
+
+
+class Login(models.Model):
+    email = models.EmailField(unique=True)
+    password = models.CharField(max_length=255)
+    user_type = models.CharField(max_length=20)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def set_password(self, raw_password):
+        self.password = make_password(raw_password)
+        self.save()
+
+    def check_password(self, raw_password):
+        return check_password(raw_password, self.password)
+
+    def __str__(self):
+        return f"{self.email} ({self.user_type})"
+    
+class Location(models.Model):
+    state = models.CharField(max_length=100)
+    district = models.CharField(max_length=100)
+    city = models.CharField(max_length=100)
+    pincode = models.CharField(max_length=6)
+    address = models.TextField()
+    latitude=models.CharField(max_length=100)
+    longitude=models.CharField(max_length=100)
+    
+    def __str__(self):
+        return f"{self.city}, {self.district}, {self.state} - {self.pincode}"
+
+    
+class RCC(models.Model):
+    login = models.OneToOneField(Login, on_delete=models.CASCADE, related_name='rcc_account')
+    name = models.CharField(max_length=100, default="Regional Cancer Center")
+    phone = models.CharField(max_length=15, blank=True, null=True)
+    location = models.ForeignKey(Location, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.name} ({self.location.state})"
+
+class BloodBank(models.Model):
+    login = models.OneToOneField(Login, on_delete=models.CASCADE, related_name='bloodbank_account')
+    name = models.CharField(max_length=100)
+    phone = models.CharField(max_length=15)
+    location = models.ForeignKey(Location, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
+    
+class Donor(models.Model):
+    BLOOD_GROUPS = [
+        ('A+', 'A+'), ('A-', 'A-'),
+        ('B+', 'B+'), ('B-', 'B-'),
+        ('AB+', 'AB+'), ('AB-', 'AB-'),
+        ('O+', 'O+'), ('O-', 'O-'),
+    ]
+
+    login = models.OneToOneField(Login, on_delete=models.CASCADE, related_name='donor_account')
+    name = models.CharField(max_length=100)
+    blood_group = models.CharField(max_length=3, choices=BLOOD_GROUPS)
+    last_donation_date = models.DateField(blank=True, null=True)
+    phone = models.CharField(max_length=15)
+    location = models.ForeignKey(Location, on_delete=models.CASCADE)
+    donor_id = models.CharField(max_length=12, unique=True, editable=False, blank=True)
+    
+    @property
+    def is_eligible(self):
+        if self.last_donation_date:
+            cooldown_period = timedelta(days=90)
+            return date.today() >= self.last_donation_date + cooldown_period
+        return True  
+
+    @property
+    def next_eligible_date(self):
+        if self.last_donation_date:
+            return self.last_donation_date + timedelta(days=90)
+        return date.today()
+
+    def save(self, *args, **kwargs):
+        if not self.donor_id:
+            prefix = "DNR"
+            random_part = str(uuid.uuid4()).split("-")[0].upper()[:6]
+            self.donor_id = f"{prefix}{random_part}"
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.name} ({self.donor_id}) ({self.blood_group})"
+
+class BloodStock(models.Model):
+    bloodbank = models.OneToOneField(BloodBank, on_delete=models.CASCADE, related_name='stock')
+
+    a_positive = models.PositiveIntegerField(default=0)
+    a_negative = models.PositiveIntegerField(default=0)
+    b_positive = models.PositiveIntegerField(default=0)
+    b_negative = models.PositiveIntegerField(default=0)
+    ab_positive = models.PositiveIntegerField(default=0)
+    ab_negative = models.PositiveIntegerField(default=0)
+    o_positive = models.PositiveIntegerField(default=0)
+    o_negative = models.PositiveIntegerField(default=0)
+
+    threshold = models.PositiveIntegerField(default=5)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def is_below_threshold(self, blood_group):
+        group_value = getattr(self, blood_group, 0)
+        return group_value <= self.threshold
+
+    def __str__(self):
+        return f"Stock for {self.bloodbank.name}"
+    
+class BloodRequest(models.Model):
+    STATUS_CHOICES = [
+        ('PENDING', 'Pending'),
+        ('APPROVED', 'Approved'),
+        ('REJECTED', 'Rejected'),
+    ]
+    rcc = models.ForeignKey(RCC, on_delete=models.CASCADE, related_name='requests')
+    blood_group = models.CharField(max_length=3, choices=Donor.BLOOD_GROUPS)
+    units_required = models.PositiveIntegerField()
+    details = models.TextField(blank=True, null=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+class BloodRequestDispatch(models.Model):
+    blood_request = models.ForeignKey(BloodRequest, on_delete=models.CASCADE, related_name='dispatches')
+    blood_bank = models.ForeignKey(BloodBank, on_delete=models.CASCADE)
+    units_sent = models.PositiveIntegerField(default=0)
+    status = models.CharField(max_length=20, choices=[
+        ('SENT', 'Sent'),
+        ('RESPONDED', 'Responded'),
+        ('DECLINED', 'Declined'),
+    ], default='SENT')
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = ('blood_request', 'blood_bank')
+
+class Donation(models.Model):
+    donor = models.ForeignKey(Donor, on_delete=models.CASCADE, related_name='donations')
+    bloodbank = models.ForeignKey(BloodBank, on_delete=models.CASCADE, related_name='donations')
+    date = models.DateField(auto_now_add=True)
+    units = models.PositiveIntegerField(default=1)
+    remarks = models.TextField(blank=True, null=True)
+    is_reported = models.BooleanField(default=False, db_index=True)
+    report_reason = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.donor.donor_id} → {self.bloodbank.name} ({self.units} unit)"
+    
+class DonorAlert(models.Model):
+    donor = models.ForeignKey('Donor', on_delete=models.CASCADE, related_name='alerts')
+    blood_bank = models.ForeignKey('BloodBank', on_delete=models.CASCADE, related_name='alerts')
+    blood_group = models.CharField(max_length=3)
+    sent_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Alert {self.blood_group} -> {self.donor.donor_id} @ {self.blood_bank.name} ({self.sent_at})"

@@ -1,0 +1,42 @@
+{% extends "bloodbank/base.html" %}
+{% block name %}🩸 Blood Stock Update{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-header text-center py-3 border-0 rounded-top-4" 
+                     style="background: linear-gradient(135deg, #b30000, #ff4d4d);">
+                    <h4 class="text-white mb-0">
+                        <i class="fas fa-tint me-2"></i>Update Blood Stock
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="row g-4">
+                            {% for field in form %}
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">{{ field.label }}</label>
+                                    {{ field }}
+                                    {% if field.errors %}
+                                        <div class="text-danger small">{{ field.errors|join:", " }}</div>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-danger btn-lg rounded-pill shadow-sm">
+                                <i class="fas fa-save me-2"></i>Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

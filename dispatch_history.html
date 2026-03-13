@@ -1,0 +1,39 @@
+{% extends 'admin1/base.html' %}
+{% block name %}Reported Donors{% endblock %}
+{% block content %}
+<h3>Reported Donors</h3>
+<table class="table table-bordered">
+    <thead class="table table-danger">
+        <tr>
+            <th>Donor ID</th>
+            <th>Blood Group</th>
+            <th>Reported By</th>
+            <th>Reason</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for donation in reports %}
+        <tr>
+            <td>{{ donation.donor.donor_id }}</td>
+            <td>{{ donation.donor.blood_group }}</td>
+            <td>{{ donation.bloodbank.name }}</td>
+            <td>{{ donation.report_reason }}</td>
+            <td>
+                {% if donation.donor.login.is_active %}
+                    <form method="POST" action="{% url 'blacklist_donor' donation.donor.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-sm">Block Donor</button>
+                    </form>
+                {% else %}
+                    <span class="badge bg-dark">Blocked</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6">No donors reported yet.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

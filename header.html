@@ -1,0 +1,30 @@
+{% extends "bloodbank/base.html" %}
+{% block content %}
+  <h2>Incoming Blood Requests</h2>
+
+  {% if dispatches %}
+    <table border="1" cellpadding="8">
+      <tr>
+        <th>SL.no</th>
+        <th>Blood Group</th>
+        <th>Total Units Required</th>
+        <th>Dispatched</th>
+        <th>Hospital</th>
+        <th>Date</th>
+      </tr>
+      {% for dispatch in dispatches %}
+        <tr>
+          <td>{{ foorloop.counter }}</td>
+          <td>{{ dispatch.blood_request.blood_group }}</td>
+          <td>{{ dispatch.blood_request.units_required }}</td>
+          <td>{{ dispatch.units_sent }}</td>
+          <td>{{ dispatch.blood_request.rcc.name }}</td>
+          <td>{{ dispatch.created_at }}</td>
+          
+        </tr>
+      {% endfor %}
+    </table>
+  {% else %}
+    <p>No dispatches yet.</p>
+  {% endif %}
+{% endblock %}

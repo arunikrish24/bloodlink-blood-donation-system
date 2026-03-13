@@ -1,0 +1,37 @@
+{% extends "bloodbank/base.html" %}
+{% block content %}
+  <h2>Incoming Blood Requests</h2>
+
+  {% if requests %}
+    <table border="1" cellpadding="8">
+      <tr>
+        <th>Blood Group</th>
+        <th>Total Units Required</th>
+        <th>Dispatched</th>
+        <th>Remaining</th>
+        <th>Hospital</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+      {% for request in requests %}
+        <tr>
+          <td>{{ request.blood_group }}</td>
+          <td>{{ request.units_required }}</td>
+          <td>{{ request.dispatched_units }}</td>
+          <td>{{ request.remaining_units }}</td>
+          <td>{{ request.rcc.name }}</td>
+          <td>{{ request.status }}</td>
+          <td>
+            {% if request.remaining_units > 0 %}
+              <a href="{% url 'dispatch_blood_units' request.id %}">Dispatch</a>
+            {% else %}
+              <span style="color: green;">Completed</span>
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+    </table>
+  {% else %}
+    <p>No requests in your region yet.</p>
+  {% endif %}
+{% endblock %}

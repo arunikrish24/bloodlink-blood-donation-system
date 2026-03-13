@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reset Password - Blood Bank</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #fff5f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .container {
+            max-width: 400px;
+            margin-top: 100px;
+            padding: 30px;
+            border-radius: 10px;
+            background-color: #fff;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        h3 {
+            color: #c82333;
+            margin-bottom: 25px;
+            font-weight: bold;
+        }
+
+        .form-control {
+            border-radius: 50px;
+            padding: 10px 20px;
+            border: 1px solid #c82333;
+        }
+
+        .btn-danger {
+            background-color: #c82333;
+            border-radius: 50px;
+            width: 100%;
+            padding: 10px;
+            border: none;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .btn-danger:hover {
+            background-color: #a71d2a;
+        }
+
+        .blood-drop {
+            font-size: 50px;
+            color: #c82333;
+            margin-bottom: 20px;
+        }
+
+        .password-feedback {
+            text-align: left;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        .password-feedback span {
+            display: block;
+        }
+
+        .valid {
+            color: green;
+        }
+
+        .invalid {
+            color: red;
+        }
+
+        #suggested-password {
+            background-color: #f8d7da;
+            color: #721c24;
+            border-radius: 50px;
+            padding: 8px 15px;
+            margin-bottom: 10px;
+            font-weight: bold;
+            display: inline-block;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="blood-drop">🩸</div>
+        <h3>Reset Password</h3>
+        <form method="POST" onsubmit="return validatePassword()">
+            {% csrf_token %}
+
+            <!-- Suggested Password Display -->
+            <div id="suggested-password-container">
+                Suggested Password: <span id="suggested-password"></span>
+            </div>
+
+            <div class="mb-3">
+                <label for="password" class="form-label">New Password</label>
+                <input type="password" name="password" id="password" class="form-control" placeholder="Enter new password" required>
+                <div class="password-feedback" id="password-feedback">
+                    <span id="length" class="invalid">• At least 8 characters</span>
+                    <span id="uppercase" class="invalid">• At least one uppercase letter</span>
+                    <span id="lowercase" class="invalid">• At least one lowercase letter</span>
+                    <span id="number" class="invalid">• At least one number</span>
+                    <span id="special" class="invalid">• At least one special character (!@#$%^&*)</span>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="confirm_password" class="form-label">Confirm Password</label>
+                <input type="password" name="confirm_password" id="confirm_password" class="form-control" placeholder="Confirm new password" required>
+                <div class="password-feedback" id="match-feedback"></div>
+            </div>
+            <button type="submit" class="btn btn-danger">Reset Password</button>
+        </form>
+    </div>
+
+    <script>
+        // Generate a strong random password
+        function generateStrongPassword(length = 12) {
+            const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+~`|}{[]:;?><,./-=";
+            let password = "";
+            for (let i = 0; i < length; i++) {
+                const randomIndex = Math.floor(Math.random() * charset.length);
+                password += charset[randomIndex];
+            }
+            return password;
+        }
+
+        const passwordInput = document.getElementById('password');
+        const confirmPasswordInput = document.getElementById('confirm_password');
+        const suggestedPasswordSpan = document.getElementById('suggested-password');
+        const suggestedContainer = document.getElementById('suggested-password-container');
+        const feedback = {
+            length: document.getElementById('length'),
+            uppercase: document.getElementById('uppercase'),
+            lowercase: document.getElementById('lowercase'),
+            number: document.getElementById('number'),
+            special: document.getElementById('special'),
+            match: document.getElementById('match-feedback')
+        };
+
+        // Suggest a strong password on page load
+        window.onload = () => {
+            const suggestedPassword = generateStrongPassword();
+            suggestedPasswordSpan.textContent = suggestedPassword;
+            passwordInput.value = suggestedPassword;
+            confirmPasswordInput.value = suggestedPassword;
+            checkPasswordStrength();
+            checkPasswordMatch();
+        };
+
+        // Check password strength
+        function checkPasswordStrength() {
+            const val = passwordInput.value;
+            feedback.length.className = val.length >= 8 ? 'valid' : 'invalid';
+            feedback.uppercase.className = /[A-Z]/.test(val) ? 'valid' : 'invalid';
+            feedback.lowercase.className = /[a-z]/.test(val) ? 'valid' : 'invalid';
+            feedback.number.className = /[0-9]/.test(val) ? 'valid' : 'invalid';
+            feedback.special.className = /[!@#$%^&*()_+~`|}{[\]:;?><,./-=]/.test(val) ? 'valid' : 'invalid';
+        }
+
+        // Check if passwords match
+        function checkPasswordMatch() {
+            if (passwordInput.value === confirmPasswordInput.value) {
+                feedback.match.textContent = "Passwords match!";
+                feedback.match.className = "valid";
+            } else {
+                feedback.match.textContent = "Passwords do not match!";
+                feedback.match.className = "invalid";
+            }
+        }
+
+        // Hide suggested password when user types
+        passwordInput.addEventListener('input', () => {
+            suggestedContainer.style.display = 'none';
+            checkPasswordStrength();
+            checkPasswordMatch();
+        });
+
+        confirmPasswordInput.addEventListener('input', checkPasswordMatch);
+
+        function validatePassword() {
+            const val = passwordInput.value;
+            const conditions = [
+                val.length >= 8,
+                /[A-Z]/.test(val),
+                /[a-z]/.test(val),
+                /[0-9]/.test(val),
+                /[!@#$%^&*()_+~`|}{[\]:;?><,./-=]/.test(val),
+                val === confirmPasswordInput.value
+            ];
+
+            if (conditions.every(Boolean)) {
+                return true;
+            } else {
+                alert("Please ensure your password meets all the criteria and matches the confirmation.");
+                return false;
+            }
+        }
+    </script>
+</body>
+</html>

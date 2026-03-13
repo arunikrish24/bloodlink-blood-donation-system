@@ -1,0 +1,204 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BloodLink - rcc - Dashboard</title>
+
+    <!-- Bootstrap & FontAwesome -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Toastify -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="{% static 'CSS/style.css' %}">
+</head>
+<body>
+
+<div class="d-flex" id="wrapper">
+    <!-- Sidebar -->
+    <div class="bg-danger text-white" id="sidebar-wrapper">
+        <div class="sidebar-heading text-center">
+            <i class="fas fa-tint"></i> BloodLink
+        </div>
+        <div class="list-group list-group-flush">
+            <a href="{% url 'rcc_dashboard' %}" class="list-group-item"><i class="fas fa-home"></i> Dashboard</a>
+            <a href="{% url '#' %}" class="list-group-item"><i class="fas fa-arrow-circle-right"></i> Request blood</a>
+            <a href="{% url '#' %}" class="list-group-item"><i class="fas fa-heartbeat"></i> Request History</a>
+            <a href="{% url 'logout' %}" class="list-group-item"><i class="fas fa-sign-out-alt"></i> Logout</a> 
+        </div>
+    </div>
+    <!-- /#sidebar-wrapper -->
+
+    <!-- Page Content -->
+    <div id="page-content-wrapper">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom shadow-sm">
+            <div class="container-fluid">
+                <div class="d-flex align-items-center">
+                    <button class="btn btn-danger me-3" id="menu-toggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h4 class="mb-0">Dashboard</h4>
+                </div>
+            </div>
+        </nav>
+
+        <div class="container-fluid mt-4">
+    <div class="row">
+        <!-- Overview Cards -->
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm p-3">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-list fa-2x text-primary me-3"></i>
+                    <div>
+                        <h5 class="mb-0">Total Requests</h5>
+                        <small>{{ total_requests }}</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm p-3">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-hourglass-half fa-2x text-warning me-3"></i>
+                    <div>
+                        <h5 class="mb-0">Pending</h5>
+                        <small>{{ pending_requests }}</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm p-3">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-check-circle fa-2x text-success me-3"></i>
+                    <div>
+                        <h5 class="mb-0">Approved</h5>
+                        <small>{{ approved_requests }}</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Requests Table -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-danger text-white">
+            <i class="fas fa-history me-2"></i> Recent Requests
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-striped mb-0">
+                <thead>
+                    <tr>
+                        <th>Blood Group</th>
+                        <th>Units</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for req in recent_requests %}
+                    <tr>
+                        <td>{{ req.blood_group }}</td>
+                        <td>{{ req.units_required }}</td>
+                        <td>
+                            <span class="badge 
+                                {% if req.status == 'PENDING' %}bg-warning
+                                {% elif req.status == 'APPROVED' %}bg-success
+                                {% elif req.status == 'REJECTED' %}bg-danger
+                                {% endif %}">
+                                {{ req.status }}
+                            </span>
+                        </td>
+                        <td>{{ req.created_at|date:"d M Y" }}</td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="4" class="text-center">No requests yet</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Stock Availability (Optional nearby banks) -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+            <i class="fas fa-warehouse me-2"></i> Nearby Blood Banks - Stock Snapshot
+        </div>
+        <div class="card-body">
+            <div class="row">
+                {% for bank in bloodbanks %}
+                <div class="col-md-4 mb-3">
+                    <div class="border rounded p-2">
+                        <h6 class="fw-bold">{{ bank.name }}</h6>
+                        {% if bank.stock %}
+                            <small>
+                                O+ : {{ bank.stock.o_positive }} | 
+                                A+ : {{ bank.stock.a_positive }} | 
+                                B+ : {{ bank.stock.b_positive }}
+                            </small>
+                        {% else %}
+                            <small class="text-muted">No stock data</small>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="d-flex gap-3">
+        <a href="{% url 'request_blood' %}" class="btn btn-danger">
+            <i class="fas fa-plus"></i> Create New Request
+        </a>
+        <a href="{% url 'rcc_blood_requests' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-tasks"></i> Track Request Status
+        </a>
+    </div>
+</div>
+
+    </div>
+</div>
+
+<!-- JS Libraries -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+<!-- Toggle Sidebar -->
+<script>
+    document.getElementById("menu-toggle").addEventListener("click", function () {
+        document.getElementById("wrapper").classList.toggle("toggled");
+    });
+</script>
+
+<!-- Toastify Messages -->
+{% if messages %}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        {% for message in messages %}
+        Toastify({
+            text: "{{ message|escapejs }}",
+            duration: 5000,
+            gravity: "top",
+            position: "right",
+            backgroundColor: "{% if message.tags == 'success' %}#28a745{% elif message.tags == 'error' %}#dc3545{% elif message.tags == 'warning' %}#ffc107{% else %}#17a2b8{% endif %}",
+            stopOnFocus: true,
+            style: {
+                borderRadius: "8px",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+                fontSize: "15px"
+            }
+        }).showToast();
+        {% endfor %}
+    });
+</script>
+{% endif %}
+
+</body>
+</html>

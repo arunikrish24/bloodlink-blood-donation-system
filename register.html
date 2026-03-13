@@ -1,0 +1,34 @@
+{% extends 'admin1/base.html' %}
+{% block name %}Registered Donors{% endblock %}
+{% block content %}
+
+
+<table class="table table-bordered">
+    <thead class="table table-danger">
+        <tr>
+            <th>Donor ID</th>
+            <th>Name</th>
+            <th>Blood Group</th>
+            <th>Phone</th>
+            <th>Location</th>
+            <th>Last Donation Date</th>
+            <th>Eligible</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for donor in donors %}
+        <tr>
+            <td>{{ donor.donor_id }}</td>
+            <td>{{ donor.name }}</td>
+            <td>{{ donor.blood_group }}</td>
+            <td>{{ donor.phone }}</td>
+            <td>{{ donor.location }}</td>
+            <td>{{ donor.last_donation_date|default:"-" }}</td>
+            <td>{% if donor.is_eligible %}✅ Yes{% else %}❌ No{% endif %}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7">No donors registered yet.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

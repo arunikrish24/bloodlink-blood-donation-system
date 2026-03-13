@@ -1,0 +1,25 @@
+{% extends 'admin1/base.html' %}
+{% block name %}Registered Blood Banks {% endblock %}
+{% block content %}
+
+<table class="table table-bordered">
+    <thead class="table table-danger">
+        <tr>
+            <th>Name</th>
+            <th>Location</th>
+            <th>Contact</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for bank in bloodbanks %}
+        <tr>
+            <td>{{ bank.name }}</td>
+            <td>{{ bank.location }}</td>
+            <td>{{ bank.phone }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4">No blood banks registered yet.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

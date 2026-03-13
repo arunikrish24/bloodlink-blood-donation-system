@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Dispatch Blood Units</h2>
+
+<p><strong>Requested Units:</strong> {{ blood_request.units_required }}</p>
+<p><strong>Remaining to be fulfilled:</strong> {{ units_remaining }}</p>
+<p><strong>Your available stock:</strong> {{ available_units }}</p>
+
+<form method="POST">
+  {% csrf_token %}
+  <label for="units">Units to Dispatch:</label>
+  <input type="number" name="units" min="1" max="{{ units_remaining }}" required>
+  <br><br>
+  <button type="submit">Dispatch</button>
+</form>
+{% endblock %}

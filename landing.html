@@ -1,0 +1,67 @@
+{% extends "bloodbank/base.html" %} 
+{% block content %} 
+{% block name %}Donation History at Your Blood Bank{% endblock %}
+
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <th>Donor ID</th>
+      <th>Blood Group</th>
+      <th>Donation Date</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for d in donations %}
+    <tr>
+      <td>{{ d.donor.donor_id }}</td>
+      <td>{{ d.donor.blood_group }}</td>
+      <td>{{ d.date }}</td>
+      <td>
+        {% if not d.is_reported %}
+          <button 
+            class="btn btn-danger btn-sm" 
+            data-bs-toggle="modal" 
+            data-bs-target="#reportModal{{ d.id }}">
+            Report
+          </button>
+        {% else %}
+          <span class="badge bg-secondary">Reported</span>
+        {% endif %}
+      </td>
+    </tr>
+
+    <!-- Modal -->
+    <div class="modal fade" id="reportModal{{ d.id }}" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <form method="POST" action="{% url 'report_donor' d.id %}">
+            {% csrf_token %}
+            <div class="modal-header">
+              <h5 class="modal-title">Report Donor {{ d.donor.donor_id }}</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+              <div class="mb-3">
+                <label for="reason{{ d.id }}" class="form-label">Reason</label>
+                <textarea name="reason" id="reason{{ d.id }}" class="form-control" rows="3" required></textarea>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure want to report donor {{d.donor.donor_id}}')">Submit Report</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <!-- End Modal -->
+
+    {% empty %}
+    <tr>
+      <td colspan="4">No donations yet.</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

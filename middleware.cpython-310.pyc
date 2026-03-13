@@ -1,0 +1,93 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BloodLink - rcc - Dashboard</title>
+
+    <!-- Bootstrap & FontAwesome -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Toastify -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="{% static 'CSS/style.css' %}">
+</head>
+<body>
+
+<div class="d-flex" id="wrapper">
+    <!-- Sidebar -->
+    <div class="bg-danger text-white" id="sidebar-wrapper">
+        <div class="sidebar-heading text-center">
+            <i class="fas fa-tint"></i> BloodLink
+        </div>
+        <div class="list-group list-group-flush">
+            <a href="{% url 'rcc_dashboard' %}" class="list-group-item"><i class="fas fa-home"></i> Dashboard</a>
+            <a href="{% url '#' %}" class="list-group-item"><i class="fa fa-arrow-circle-right"></i> Request blood</a>
+            <a href="{% url '#' %}" class="list-group-item"><i class="fas fa-heartbeat"></i> Request History</a>
+            <a href="{% url 'logout' %}" class="list-group-item"><i class="fas fa-sign-out-alt"></i> Logout</a> 
+        </div>
+    </div>
+    <!-- /#sidebar-wrapper -->
+
+    <!-- Page Content -->
+    <div id="page-content-wrapper">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom shadow-sm">
+            <div class="container-fluid">
+                <div class="d-flex align-items-center">
+                    <button class="btn btn-danger me-3" id="menu-toggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h4 class="mb-0">Dashboard</h4>
+                </div>
+            </div>
+        </nav>
+
+        <div class="container-fluid mt-4">
+            <div class="row">                
+            {% block content %}
+            {% endblock %} 
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JS Libraries -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+<!-- Toggle Sidebar -->
+<script>
+    document.getElementById("menu-toggle").addEventListener("click", function () {
+        document.getElementById("wrapper").classList.toggle("toggled");
+    });
+</script>
+
+<!-- Toastify Messages -->
+{% if messages %}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        {% for message in messages %}
+        Toastify({
+            text: "{{ message|escapejs }}",
+            duration: 5000,
+            gravity: "top",
+            position: "right",
+            backgroundColor: "{% if message.tags == 'success' %}#28a745{% elif message.tags == 'error' %}#dc3545{% elif message.tags == 'warning' %}#ffc107{% else %}#17a2b8{% endif %}",
+            stopOnFocus: true,
+            style: {
+                borderRadius: "8px",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+                fontSize: "15px"
+            }
+        }).showToast();
+        {% endfor %}
+    });
+</script>
+{% endif %}
+
+</body>
+</html>

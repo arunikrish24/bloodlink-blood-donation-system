@@ -1,0 +1,35 @@
+{% extends "rcc/base.html" %}
+{% block content %}
+
+  <div class="card shadow-sm bg-light">
+    <div class="card-body">
+
+      {% if requests %}
+        <div class="table-responsive">
+          <table class="table table-bordered table-hover align-middle bg-white">
+            <thead class="table-secondary">
+              <tr>
+                <th>Requested Blood Group</th>
+                <th>Units Required</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for req in requests %}
+                <tr>
+                  <td>{{ req.blood_group }}</td>
+                  <td>{{ req.units_required }}</td>
+                  <td>{{ req.status }}</td>
+
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="text-muted">No requests found.</p>
+      {% endif %}
+    </div>
+  </div>
+
+{% endblock %}

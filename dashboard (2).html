@@ -1,0 +1,117 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BloodLink - Admin - Dashboard</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="{% static 'CSS/style.css' %}">
+</head>
+<body>
+
+<div class="d-flex" id="wrapper">
+    <!-- Sidebar -->
+    <div class="bg-danger text-white" id="sidebar-wrapper">
+        <div class="sidebar-heading text-center">
+            <i class="fas fa-tint"></i> BloodLink
+        </div>
+        <div class="list-group list-group-flush">
+            <a href="{% url 'admin_dashboard' %}" class="list-group-item"><i class="fas fa-home"></i> Dashboard</a>
+            <a href="{% url 'admin_view_donors' %}" class="list-group-item"><i class="fas fa-users"></i> Donors</a>
+            <a href="{% url 'admin_view_bloodbanks' %}" class="list-group-item"><i class="fas fa-warehouse"></i> Blood Banks</a>
+            <a href="{% url '#' %}" class="list-group-item"><i class="fas fa-warehouse"></i> Reports</a>
+            <a href="{% url 'logout' %}" class="list-group-item"><i class="fas fa-sign-out-alt"></i> Logout</a> 
+        </div>
+    </div>
+    <!-- /#sidebar-wrapper -->
+
+    <!-- Page Content -->
+    <div id="page-content-wrapper">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom shadow-sm">
+            <div class="container-fluid">
+                <div class="d-flex align-items-center">
+                    <button class="btn btn-danger me-3" id="menu-toggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h4 class="mb-0">{% block name %}{% endblock %}</h4>
+                </div>
+            </div>
+        </nav>
+
+        <div class="container-fluid mt-4">
+            <div class="row">
+                    {% block content %}
+                    {% endblock %}
+            
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="createStockModal" tabindex="-1" aria-labelledby="createStockModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="createStockModalLabel"><i class="fas fa-warehouse"></i> Blood Stock Not Found</h5>
+      </div>
+      <div class="modal-body">
+        <p>You haven't added your blood stock yet. Please create your stock now to start managing blood requests efficiently.</p>
+      </div>
+      <div class="modal-footer">
+        <a href="{% url 'update_stock' %}" class="btn btn-success">Create Stock</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% if show_modal %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    var stockModal = new bootstrap.Modal(document.getElementById('createStockModal'));
+    stockModal.show();
+  });
+</script>
+{% endif %}
+
+<!-- JS Libraries -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+<!-- Toggle Sidebar -->
+<script>
+    document.getElementById("menu-toggle").addEventListener("click", function () {
+        document.getElementById("wrapper").classList.toggle("toggled");
+    });
+</script>
+
+<!-- Toastify Messages -->
+{% if messages %}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        {% for message in messages %}
+        Toastify({
+            text: "{{ message|escapejs }}",
+            duration: 5000,
+            gravity: "top",
+            position: "right",
+            backgroundColor: "{% if message.tags == 'success' %}#28a745{% elif message.tags == 'error' %}#dc3545{% elif message.tags == 'warning' %}#ffc107{% else %}#17a2b8{% endif %}",
+            stopOnFocus: true,
+            style: {
+                borderRadius: "8px",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+                fontSize: "15px"
+            }
+        }).showToast();
+        {% endfor %}
+    });
+</script>
+{% endif %}
+
+</body>
+</html>

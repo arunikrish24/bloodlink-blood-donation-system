@@ -1,0 +1,73 @@
+{% extends "bloodbank/base.html" %}
+{% load widget_tweaks %}
+{% block name %}
+  Add Donation
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <form method="post">
+        {% csrf_token %}
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label for="donor_id_input" class="form-label">Enter Donor ID</label>
+            <input type="text" id="donor_id_input" class="form-control" placeholder="Type Donor ID...">
+          </div>
+          <div class="col-md-6">
+            <label for="id_donor" class="form-label">Matching Donor</label>
+            <select name="donor" id="id_donor" class="form-select">
+              <option value="" disabled selected>Select Donor</option>
+              {% for donor in form.fields.donor.queryset %}
+                <option value="{{ donor.id }}" data-bloodgroup="{{ donor.blood_group }}">
+                  {{ donor.name }} (ID: {{ donor.donor_id }})
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label for="id_blood_group" class="form-label">Blood Group</label>
+            {{ form.blood_group|add_class:"form-control" }}
+          </div>
+          <div class="col-md-6">
+            <label for="id_units_donated" class="form-label">Units Donated</label>
+            {{ form.units_donated|add_class:"form-control" }}
+          </div>
+          <div class="col-md-12">
+            <label for="id_units_donated" class="form-label">Remarks</label>
+            {{ form.remarks|add_class:"form-control" }}
+          </div>
+        </div>
+
+        <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+          <button type="submit" class="btn btn-success px-4">Submit</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+    document.getElementById("donor_id_input").addEventListener("keyup", function () {
+        const input = this.value.toLowerCase();
+        const donorSelect = document.getElementById("id_donor");
+        for (let option of donorSelect.options) {
+            option.style.display = option.text.toLowerCase().includes(input) ? "block" : "none";
+        }
+    });
+
+    document.getElementById("id_donor").addEventListener("change", function () {
+        const selectedOption = this.options[this.selectedIndex];
+        const bloodGroup = selectedOption.getAttribute("data-bloodgroup");
+        const bloodGroupSelect = document.getElementById("id_blood_group");
+
+        if (bloodGroup) {
+            bloodGroupSelect.value = bloodGroup;
+        }
+    });
+</script>
+{% endblock %}

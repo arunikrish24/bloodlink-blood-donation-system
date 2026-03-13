@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forgot Password - Blood Bank</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <style>
+        body {
+            background-color: #fff5f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .container {
+            max-width: 400px;
+            margin-top: 100px;
+            padding: 30px;
+            border-radius: 10px;
+            background-color: #fff;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        h3 {
+            color: #c82333; /* Blood red theme */
+            margin-bottom: 25px;
+            font-weight: bold;
+        }
+
+        .form-control {
+            border-radius: 50px;
+            padding: 10px 20px;
+            border: 1px solid #c82333;
+        }
+
+        .btn-danger {
+            background-color: #c82333;
+            border-radius: 50px;
+            width: 100%;
+            padding: 10px;
+            border: none;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .btn-danger:hover {
+            background-color: #a71d2a;
+        }
+
+        .blood-drop {
+            font-size: 50px;
+            color: #c82333;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="blood-drop">💉</div>
+        <h3>Forgot Password</h3>
+        <form id="forgot-password-form" method="POST">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="email" class="form-label">Email Address</label>
+                <input type="email" name="email" id="email" class="form-control" placeholder="Enter your registered email" required>
+            </div>
+            <button type="submit" class="btn btn-danger">Send Reset Link</button>
+        </form>
+    </div>
+
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script>
+        const form = document.getElementById('forgot-password-form');
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault(); // Prevent actual form submission for demo
+
+            // Simulate email sending
+            setTimeout(() => {
+                Toastify({
+                    text: "Reset link sent successfully to your email!",
+                    duration: 3000,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: "#28a745",
+                    stopOnFocus: true
+                }).showToast();
+            }, 500);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,258 @@
+{% extends 'index/header.html' %}
+{% block content %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Register BloodBank | BloodCare</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+  <style>
+    body { background-color: #f7f7f7; }
+    .container {
+      max-width: 900px; margin-top: 40px;
+      background: #fff; padding: 30px;
+      border-radius: 10px; box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    }
+    #map { height: 400px; width: 100%; }
+    .error-msg { color: red; font-size: 14px; }
+  </style>
+</head>
+<body>
+<div class="container mt-4">
+  <h3 class="mb-4 text-center">Register BloodBank</h3>
+
+  <form method="POST" id="bbRegisterForm" novalidate>
+    {% csrf_token %}
+
+    <!-- RCC Form -->
+    <div class="mb-3">
+      {{ bloodbank_form.name.label_tag }}
+      {{ bloodbank_form.name }}
+    </div>
+    <div class="mb-3">
+      {{ bloodbank_form.phone.label_tag }}
+      {{ bloodbank_form.phone }}
+      <small id="phoneError" class="error-msg text-danger"></small>
+    </div>
+
+    <!-- Login Form -->
+    <div class="mb-3">
+      {{ login_form.email.label_tag }}
+      {{ login_form.email }}
+      <small id="emailError" class="error-msg text-danger"></small>
+    </div>
+
+    <!-- Password -->
+    <div class="mb-3">
+      <label for="id_password1" class="form-label">Password</label>
+      <div class="input-group">
+        <input type="password" name="password1" class="form-control" id="id_password1" required>
+        <button class="btn btn-outline-secondary toggle-password" type="button" data-target="id_password1">
+          <i class="bi bi-eye"></i>
+        </button>
+      </div>
+      <small id="password1Error" class="error-msg text-danger"></small>
+    </div>
+
+    <div class="mb-3">
+      <label for="id_password2" class="form-label">Confirm Password</label>
+      <div class="input-group">
+        <input type="password" name="password2" class="form-control" id="id_password2" required>
+        <button class="btn btn-outline-secondary toggle-password" type="button" data-target="id_password2">
+          <i class="bi bi-eye"></i>
+        </button>
+      </div>
+      <small id="password2Error" class="error-msg text-danger"></small>
+    </div>
+
+    <!-- Location Form -->
+    <h5 class="mt-4">Location Details</h5>
+    <div class="row">
+      <div class="col-md-6 mb-3">{{ location_form.state.label_tag }} {{ location_form.state }}</div>
+      <div class="col-md-6 mb-3">{{ location_form.district.label_tag }} {{ location_form.district }}</div>
+      <div class="col-md-6 mb-3">{{ location_form.city.label_tag }} {{ location_form.city }}</div>
+      <div class="col-md-6 mb-3">{{ location_form.pincode.label_tag }} {{ location_form.pincode }}</div>
+    </div>
+    <div class="mb-3">{{ location_form.address.label_tag }} {{ location_form.address }}</div>
+
+    <!-- Location Map -->
+    <div class="mt-3 mb-2">
+      <button type="button" class="btn btn-primary me-2" onclick="getLocation()">Use My Location</button>
+      <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#mapModal">Select on Map</button>
+
+      <div class="mt-3">
+        <label for="latitude">Latitude</label>
+        <input type="text" name="latitude" id="latitude" readonly class="form-control"/>
+        <label for="longitude" class="mt-2">Longitude</label>
+        <input type="text" name="longitude" id="longitude" readonly class="form-control"/>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-success mt-3 w-100">Register BloodBank</button>
+  </form>
+</div>
+
+<!-- Map Modal -->
+<div class="modal fade" id="mapModal" tabindex="-1" aria-labelledby="mapModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Select Location on Map</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div id="map" style="height:400px;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  // ================= MAP =================
+  let map, marker;
+  function initMap(lat = 8.8932, lng = 76.6141) {
+    if (!map) {
+      map = L.map("map").setView([lat, lng], 14);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 19, attribution: "&copy; OpenStreetMap contributors"
+      }).addTo(map);
+      marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+      marker.on("moveend", e => {
+        const { lat, lng } = e.target.getLatLng();
+        setCoordinates(lat, lng);
+      });
+      map.on("click", e => {
+        const { lat, lng } = e.latlng;
+        marker.setLatLng([lat, lng]);
+        setCoordinates(lat, lng);
+      });
+    } else {
+      map.setView([lat, lng], 14);
+      marker.setLatLng([lat, lng]);
+    }
+    setTimeout(() => map.invalidateSize(), 300);
+  }
+  function setCoordinates(lat, lng) {
+    document.getElementById("latitude").value = lat.toFixed(6);
+    document.getElementById("longitude").value = lng.toFixed(6);
+  }
+  window.getLocation = function() {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        pos => { setCoordinates(pos.coords.latitude, pos.coords.longitude); initMap(pos.coords.latitude, pos.coords.longitude); },
+        err => alert("Error getting location: " + err.message)
+      );
+    } else { alert("Geolocation is not supported."); }
+  }
+  document.getElementById("mapModal").addEventListener("shown.bs.modal", () => {
+    const lat = parseFloat(document.getElementById("latitude").value) || 8.8932;
+    const lng = parseFloat(document.getElementById("longitude").value) || 76.6141;
+    initMap(lat, lng);
+  });
+
+  // ================= VALIDATION =================
+  const form = document.getElementById("bbRegisterForm");
+  const email = document.getElementById("id_email");
+  const password1 = document.getElementById("id_password1");
+  const password2 = document.getElementById("id_password2");
+  const phone = document.getElementById("id_phone");
+
+  function validateEmail() {
+    const error = document.getElementById("emailError");
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!regex.test(email.value)) { error.textContent = "Invalid email."; return false; }
+    error.textContent = ""; return true;
+  }
+
+  function validatePasswordStrength(password) {
+    const criteria = [
+      { regex: /.{8,}/, message: "At least 8 characters" },
+      { regex: /[a-z]/, message: "At least 1 lowercase letter" },
+      { regex: /[A-Z]/, message: "At least 1 uppercase letter" },
+      { regex: /\d/, message: "At least 1 number" },
+      { regex: /[@$!%*?&]/, message: "At least 1 special character (@$!%*?&)" }
+    ];
+    const failed = criteria.filter(c => !c.regex.test(password));
+    return { valid: failed.length === 0, failed };
+  }
+
+  function validatePasswords() {
+    let valid = true;
+    const e1 = document.getElementById("password1Error");
+    const e2 = document.getElementById("password2Error");
+    const check = validatePasswordStrength(password1.value);
+
+    if (!check.valid) {
+      e1.innerHTML = "Password must contain:<br> - " + check.failed.map(f => f.message).join("<br> - ");
+      password1.classList.add("is-invalid");
+      valid = false;
+    } else {
+      e1.textContent = "";
+      password1.classList.remove("is-invalid");
+      password1.classList.add("is-valid");
+    }
+
+    if (password1.value !== password2.value || password2.value === "") {
+      e2.textContent = "Passwords do not match";
+      password2.classList.add("is-invalid");
+      valid = false;
+    } else {
+      e2.textContent = "";
+      password2.classList.remove("is-invalid");
+      password2.classList.add("is-valid");
+    }
+
+    return valid;
+  }
+
+  function validatePhone() {
+    const error = document.getElementById("phoneError");
+    const regex = /^[0-9]{10}$/;
+    if (!regex.test(phone.value)) { error.textContent = "Enter a valid 10-digit phone."; return false; }
+    error.textContent = ""; return true;
+  }
+
+  email.addEventListener("input", validateEmail);
+  password1.addEventListener("input", validatePasswords);
+  password2.addEventListener("input", validatePasswords);
+  phone.addEventListener("input", validatePhone);
+
+  form.addEventListener("submit", e => {
+    if (!(validateEmail() && validatePasswords() && validatePhone())) {
+      e.preventDefault();
+      alert("Please fix errors before submitting.");
+    }
+  });
+
+  // ================= TOGGLE PASSWORD VISIBILITY =================
+  document.querySelectorAll(".toggle-password").forEach(btn => {
+    btn.addEventListener("click", function () {
+      const targetId = this.getAttribute("data-target");
+      const input = document.getElementById(targetId);
+      const icon = this.querySelector("i");
+      if (input.type === "password") {
+        input.type = "text";
+        icon.classList.remove("bi-eye");
+        icon.classList.add("bi-eye-slash");
+      } else {
+        input.type = "password";
+        icon.classList.remove("bi-eye-slash");
+        icon.classList.add("bi-eye");
+      }
+    });
+  });
+});
+</script><br>
+{% endblock %}

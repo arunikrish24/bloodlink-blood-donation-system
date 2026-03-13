@@ -1,0 +1,9 @@
+{% extends "rcc/base.html" %}
+{% block content %}
+  <h2>Submit Blood Request</h2>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Submit Request</button>
+  </form>
+{% endblock %}
