@@ -35,6 +35,13 @@ python manage.py runserver
 
 http://127.0.0.1:8000/
 
+
+step 1: open cmd
+
+ step 2: cd cd BloodLink
+ step 3: py manage.py runserver
+ step 4: http://127.0.0.1:8000 open in browser 
+
 ## Project Purpose
 
 This project was developed as part of my MCA academic work to learn web application development using the Django framework.
